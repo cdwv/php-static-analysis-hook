@@ -23,6 +23,9 @@
         "bin/symlink-git-hooks-to-hub",
         "bin/git-hook-hub",
         "bin/pre-commit"
+    ],
+    "post-install-cmd": [
+        "bin/symlink-git-hooks-to-hub"
     ]
 
 }
