@@ -21,8 +21,7 @@
     },
     "bin": [
         "bin/symlink-git-hooks-to-hub",
-        "bin/git-hook-hub",
-        "bin/hooks/pre-commit"
+        "bin/git-hook-hub"
     ]
 
 }
