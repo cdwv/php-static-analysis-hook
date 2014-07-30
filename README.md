@@ -7,6 +7,10 @@ Static analysis tools included in the current version of the hook:
 
 Additionally, the tool symlinks hook to Composer's `bin-dir`, so that it's code can be versioned in the repository (credits to this StackOverflow.com answer: http://stackoverflow.com/a/3464399)
 
+## Requirements
+* an initialized git repository in the project's directory
+* the repository needs to have at least one commit for the script to work correctly. Yes, it is a bug - I didn't have time to cover that yet (but please go ahead and fix it).
+
 ## Usage
 1. Add the package to require-dev section of your composer.json file and run `composer update`. Example:
 ```
