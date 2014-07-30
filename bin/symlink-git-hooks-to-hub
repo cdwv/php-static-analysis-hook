@@ -1,8 +1,12 @@
 #!/bin/bash
+
+#TODO: replace HOOK_NAMES array with a dynamically generated list of hooks supported by a local version of git
 HOOK_NAMES="applypatch-msg pre-applypatch post-applypatch pre-commit prepare-commit-msg commit-msg post-commit pre-rebase post-checkout post-merge pre-receive update post-receive post-update pre-auto-gc"
 
 HOOK_DIR=$(git rev-parse --show-toplevel)/.git/hooks
-HOOK_SCRIPT=$(git rev-parse --show-toplevel)/git-hooks/git-hook-hub
+
+#TODO: replace /bin/ in HOOK_SCRIPT with a variable depending on Composer's bin-dir value
+HOOK_SCRIPT=$(git rev-parse --show-toplevel)/bin/git-hook-hub
 
 for hook in $HOOK_NAMES; do
     if [ ! -h $HOOK_DIR/$hook -a -x $HOOK_DIR/$hook ]; then

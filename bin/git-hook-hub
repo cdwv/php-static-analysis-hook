@@ -1,5 +1,7 @@
 #!/bin/bash
-HOOK_DIR=$(git rev-parse --show-toplevel)/git-hooks/hooks/
+
+#TODO: Replace /bin/ with Composer's bin-dir value
+HOOK_DIR=$(git rev-parse --show-toplevel)/bin/
 
 if [ -x $0.local ]; then
     $0.local "$@" || exit $?
