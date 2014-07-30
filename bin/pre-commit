@@ -1,6 +1,6 @@
 #!/bin/sh
 
-PROJECT=`php -r "echo dirname(dirname(dirname(realpath('$0'))));"`
+PROJECT=$(git rev-parse --show-toplevel)
 STAGED_FILES_CMD=`git diff --cached --name-only --diff-filter=ACMR HEAD | grep \\\\.php`
 
 # Determine if a file list is passed
