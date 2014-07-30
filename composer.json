@@ -1,0 +1,22 @@
+{
+    "name": "wozinski/php-static-analysis-hook",
+    "type": "library",
+    "description": "A script that enables ",
+    "keywords": ["static-analysis","git","pre-commit-hook"],
+    "homepage": "http://github.com/wozinski/php-static-analysis-hook/",
+    "license": "MIT",
+    "version": "0.0.1",
+    "authors": [
+        {
+            "name": "Lukasz Wozinski, CodeWave",
+            "email": "lukasz+Z2l0aHViCg==@wozinski.pl",
+            "homepage": "http://codewave.pl",
+            "role": "Development Manager"
+        }
+    ],
+    "require": {
+        "php": ">=5.3.0",
+        "phpmd/phpmd": "*",
+        "squizlabs/php_codesniffer": "2.0.*@dev"
+    }
+}
