@@ -5,7 +5,11 @@ Static analysis tools included in the current version of the hook:
 * [PHP_CodeSniffer](https://github.com/squizlabs/PHP_CodeSniffer)
 * [PHP Mess Detector](https://github.com/phpmd/phpmd)
 
-Additionally, the tool symlinks hook to Composer's `bin-dir`, so that it's code can be versioned in the repository (credits to this StackOverflow.com answer: http://stackoverflow.com/a/3464399)
+Additionally, the tool symlinks hook to Composer's `bin-dir`, so that it's code can be versioned in the repository.
+
+## Credits
+The tool is an extended version of [this gist](https://gist.github.com/cjsaylor/10503398#file-pre-commit) by [cjsaylor](https://github.com/cjsaylor).
+Git hook versioning is inspired by this StackOverflow answer: http://stackoverflow.com/a/3464399
 
 ## Requirements
 * an initialized git repository in the project's directory
