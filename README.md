@@ -32,9 +32,11 @@ The script doesn't need any additional action - it runs whenever you run a `git 
 
 ## Ignore-errors mode
 Sometimes it might be useful to commit the code even though it contains some issues. You can do that by setting an environment variable `STATIC_ANALYSIS_IGNORE_ERRORS` prior to running `git commit` command.
+
 Please note that you should remember to unset the variable after the commit. Otherwise, all your future commits will not be blocked in case there are errors in your code.
 The following command sets the variable before the commit and unsets it afterwards, feel free to use it or adjust it to your own needs:
-`$> export STATIC_ANALYSIS_DRY_RUN="t" && git commit -a; unset STATIC_ANALYSIS_DRY_RUN`
+
+```export STATIC_ANALYSIS_IGNORE_ERRORS="t" && git commit -a; unset STATIC_ANALYSIS_IGNORE_ERRORS```
 
 ## Disclaimer
 The script in it's current version is only a proof of concept and should be used with extreme care. Use it at your own risk.
