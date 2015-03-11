@@ -1,5 +1,5 @@
 {
-    "name": "wozinski/php-static-analysis-hook",
+    "name": "cdwv/php-static-analysis-hook",
     "type": "library",
     "description": "A script that enables ",
     "keywords": ["static-analysis","git","pre-commit-hook"],
