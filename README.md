@@ -20,7 +20,7 @@ Git hook versioning is inspired by this StackOverflow answer: http://stackoverfl
 ```
 {
     "require-dev": {
-        "wozinski/php-static-analysis-hook": "dev-master"
+        "cdwv/php-static-analysis-hook": "dev-master"
     }
 }
 
