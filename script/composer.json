@@ -1,0 +1,14 @@
+{
+    "name": "cdwv/static-analysis-tools",
+    "description": "Static analysis tools for php&js apps",
+    "authors": [
+        {
+            "name": "Grzegorz Daszuta",
+            "email": "grzegorz.daszuta@codewave.pl"
+        }
+    ],
+    "require": {
+        "squizlabs/php_codesniffer": "^2.5",
+        "phpmd/phpmd": "^2.4"
+    }
+}

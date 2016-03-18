@@ -1,0 +1,23 @@
+{
+  "name": "static-analysis-tools",
+  "version": "0.0.1",
+  "description": "Static analysis tools for php&js apps",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "gulp": "^3.9.1",
+    "gulp-git": "^1.7.0",
+    "gulp-jshint": "^2.0.0",
+    "gulp-phpcpd": "^1.0.1",
+    "gulp-phpcs": "^1.0.0",
+    "gulp-phplint": "0.0.6",
+    "gulp-phpmd": "^2.0.1",
+    "gulp-debug": "^2.1.2",
+    "jshint": "^2.9.1",
+    "jshint-stylish": "^2.1.0"
+  }
+}
