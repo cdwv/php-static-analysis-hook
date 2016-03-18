@@ -40,3 +40,7 @@ The following command sets the variable before the commit and unsets it afterwar
 
 ## Disclaimer
 The script in it's current version is only a proof of concept and should be used with extreme care. Use it at your own risk.
+
+## Docker usage
+
+docker build -t cdwv/static-anal . && docker run -it --rm -v <source tree base>:/target cdwv/static-anal
