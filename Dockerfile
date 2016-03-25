@@ -34,6 +34,14 @@ RUN npm install
 RUN wget -O- https://getcomposer.org/installer | php
 RUN php composer.phar install
 
-ADD ./script/Gulpfile.js /app/
+# To by nie było złe narzędzie - tylko niespecjalnie działa
+# w połączeniu z Composerem/Symfony
+
+# ADD http://www.icosaedro.it/phplint/phplint-3.0_20160307.tar.gz /app/
+# RUN tar xf phplint-3.0_20160307
+# RUN mv phplint-3.0_20160307 phplint
+# RUN sed -i 's#/opt/php/bin/php#php#g' phplint/php
+
+ADD ./script/*.js /app/
 
 ENTRYPOINT ["gulp"]

@@ -1,3 +1,4 @@
 /vendor/
 phpstaticanalysishook.sublime-project
 phpstaticanalysishook.sublime-workspace
+node_modules/
