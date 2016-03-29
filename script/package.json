@@ -14,15 +14,15 @@
     "gulp-debug": "^2.1.2",
     "gulp-git": "^1.7.0",
     "gulp-jshint": "^2.0.0",
-    "gulp-phpcpd": "^1.0.1",
-    "gulp-phpcs": "git+https://github.com/cdwv/gulp-phpcs.git",
-    "gulp-phplint": "0.0.6",
-    "gulp-phpmd": "^2.0.1",
+    "gulp-param": "^1.0.3",
     "gulp-util": "^3.0.7",
     "jshint": "^2.9.1",
     "jshint-json": "^1.0.0",
     "jshint-stylish": "^2.1.0",
+    "libxmljs": "^0.17.1",
     "map-stream": "0.0.6",
-    "run-sequence": "^0.3.6"
+    "minimist": "^1.2.0",
+    "run-sequence": "^0.3.6",
+    "through2": "^2.0.1"
   }
 }

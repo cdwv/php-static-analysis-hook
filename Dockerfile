@@ -14,6 +14,7 @@ RUN wget -O- https://www.dotdeb.org/dotdeb.gpg | apt-key add -
 # Install git
 
 RUN apt-get update && apt-get install -y git rsync bzip2 locales
+
 # Build locales
 
 RUN locale-gen --lang pl
@@ -21,10 +22,10 @@ RUN locale-gen --lang en
 
 # Install php
 
-RUN apt-get install -y php5-cli php7.0-cli
-RUN npm install -g gulp-cli
+RUN apt-get install -y php5-cli php7.0-cli python build-essential
+RUN npm install -g gulp-cli jshint
 
-# ADD script/ /app
+# ADD script/ /app 
 
 WORKDIR /app
 ADD ./script/package.json /app/
@@ -34,14 +35,8 @@ RUN npm install
 RUN wget -O- https://getcomposer.org/installer | php
 RUN php composer.phar install
 
-# To by nie było złe narzędzie - tylko niespecjalnie działa
-# w połączeniu z Composerem/Symfony
-
-# ADD http://www.icosaedro.it/phplint/phplint-3.0_20160307.tar.gz /app/
-# RUN tar xf phplint-3.0_20160307
-# RUN mv phplint-3.0_20160307 phplint
-# RUN sed -i 's#/opt/php/bin/php#php#g' phplint/php
-
 ADD ./script/*.js /app/
+
+ADD phpmd/* /app/phpmd/
 
 ENTRYPOINT ["gulp"]
