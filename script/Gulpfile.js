@@ -2,7 +2,7 @@
 * @Author: Grzegorz Daszuta
 * @Date:   2016-03-18 13:31:54
 * @Last Modified by:   Grzegorz Daszuta
-* @Last Modified time: 2016-03-30 08:45:48
+* @Last Modified time: 2016-03-30 13:57:22
 */
 
 'use strict';
@@ -20,94 +20,70 @@ var util = require("util");
 var gutil = require('gulp-util');
 var chalk = require('chalk');
 
-var targetFiles = {
-    php: [],
-    js: [],
-};
+var targetFiles = [];
 
-gulp.task('getPhpFiles', function(done) {
-    git.exec({
-        'args': 'ls-files -comvizx \'*.php\'',
-        'cwd': '/target',
-        'maxBuffer': 1024 * 50000
-    }, function(err, stdout) {
-        if (err) throw err;
-
-        targetFiles.php = stdout
-            .split(/\0/)
-            .map(function(i) {
-                var m = i.match(/(.)\s(.+)/);
-
-                if(m) {
-                    return {
-                        'status': m[1],
-                        'filename': m[2],
-                    };
-                }
-            })
-            .filter(function (i) {
-                return i && i.filename;
-            })
-            .filter(function (i) {
-                return (argv.all ? 'HC' : 'C').indexOf(i.status) !== -1
-            })
-            .map(function(i) {
-                return i.filename;
-            });
-
-        done();
-    });
-});
-
-gulp.task('getJsFiles', function(done) {
-    git.exec({
-        'args': 'ls-files -comvizx \'*.js\'',
-        'cwd': '/target',
-        'maxBuffer': 1024 * 50000
-    }, function(err, stdout) {
-        if (err) throw err;
-
-        targetFiles.js = stdout
-            .split(/\0/)
-            .map(function(i) {
-                var m = i.match(/(.)\s(.+)/);
-
-                if(m) {
-                    return {
-                        'status': m[1],
-                        'filename': m[2],
-                    };
-                }
-            })
-            .filter(function (i) {
-                return i && i.filename;
-            })
-            .filter(function (i) {
-                return (argv.all ? 'HC' : 'C').indexOf(i.status) !== -1
-            })
-            .map(function(i) {
-                return i.filename;
-            });
-        done();
-    });
-});
+var fileTypes = [
+    'php',
+    'js',
+    'css',
+    'scss',
+];
 
 gulp.task('getFiles', function(done) {
-    seq('getPhpFiles', 'getJsFiles', done);
+    git.exec({
+        'args': 'ls-files -comvz',
+        'cwd': '/target',
+        'maxBuffer': 1024 * 50000
+    }, function(err, stdout) {
+        if (err) throw err;
+
+        stdout
+            .split(/\0/)
+            .map(function(i) {
+                var m = i.match(/(.)\s(.+)/);
+
+                if(m) {
+                    return {
+                        'status': m[1],
+                        'filename': m[2],
+                    };
+                }
+            })
+            .filter(function (i) {
+                return i && i.filename;
+            })
+            .filter(function (i) {
+                return (argv.all ? 'HC' : 'C').indexOf(i.status) !== -1
+            })
+            .filter(function(i) {
+                var ext = i.filename.replace(/.*\./, '');
+                return fileTypes.indexOf(ext) !== -1;
+            })
+            .map(function(i) {
+                return i.filename;
+            }).forEach(function(i) {
+                targetFiles.push(i);
+            });
+
+        done();
+    });
 });
 
-var lintPlugin = function(options) {
-    return through.obj(function(file, enc, callback) {
-        var stream = this;
-
-        this.push(file);
-        callback();
-    });
-}
-
 var phpMdPlugin = function(options) {
+    var catchFiles = ['php'];
+
     return through.obj(function(file, enc, callback) {
         var stream = this;
+        
+        var ext = file.path.replace(/.*\./, '');
+
+        // skip
+        if(catchFiles.indexOf(ext) === -1) {
+            stream.push(file);
+            callback();
+            return;
+        }
+        
 
         var args = [
             ' ',
@@ -131,8 +107,19 @@ var phpMdPlugin = function(options) {
 }
 
 var phpCsPlugin = function(options) {
+    var catchFiles = [ 'php' ];
+
     return through.obj(function(file, enc, callback) {
         var stream = this;
+        
+        var ext = file.path.replace(/.*\./, '');
+
+        // skip
+        if(catchFiles.indexOf(ext) === -1) {
+            stream.push(file);
+            callback();
+            return;
+        }
 
         var args = [
             'php',
@@ -157,9 +144,20 @@ var phpCsPlugin = function(options) {
 }
 
 var phpLintPlugin = function(options) {
+    var catchFiles = [ 'php' ];
+
     return through.obj(function(file, enc, callback) {
         var stream = this;
 
+        var ext = file.path.replace(/.*\./, '');
+
+        // skip
+        if(catchFiles.indexOf(ext) === -1) {
+            stream.push(file);
+            callback();
+            return;
+        }
+        
         var args = [
             'php',
             '-d', 'display_errors=1',
@@ -180,8 +178,19 @@ var phpLintPlugin = function(options) {
 }
 
 var jsHintPlugin = function(options) {
+    var catchFiles = [ 'js' ];
+
     return through.obj(function(file, enc, callback) {
         var stream = this;
+
+        var ext = file.path.replace(/.*\./, '');
+
+        // skip
+        if(catchFiles.indexOf(ext) === -1) {
+            stream.push(file);
+            callback();
+            return;
+        }
 
         var args = [
             'jshint',
@@ -308,17 +317,17 @@ var combineReports = function(options) {
         callback();
 
     }, function(callback) {
+
         var combinedReport = libxml.Document().node('checkstyle');
 
         var filePath;
 
         for(filePath in allReports) {
             var fileReport = allReports[filePath];
-
             var engine;
+            var file = combinedReport.node('file').attr({name: filePath});
 
             for(engine in fileReport) {
-                var file = combinedReport.node('file').attr({name: filePath});
                 var checkstyleReport = convertReport(engine, fileReport[engine]);
 
                 checkstyleReport.find('//error').forEach(function(node) {
@@ -327,32 +336,57 @@ var combineReports = function(options) {
                 });
             }
         };
-            fs.writeFile(options.path, combinedReport.toString(), function(err) {
-                if (err) {
-                    stream.emit('error', new gutil.PluginError('gulp-phpcs', err));
-                    callback();
 
-                    return;
-                }
-
-                // Build console info message
-                var message = util.format(
-                    'Your report got written to %s',
-                    chalk.magenta(options.path)
-                );
-
-                // And output it.
-                gutil.log(message);
-
+        fs.writeFile(options.path, combinedReport.toString(), function(err) {
+            if (err) {
+                stream.emit('error', new gutil.PluginError('gulp-phpcs', err));
                 callback();
-            });
+
+                return;
+            }
+
+            // Build console info message
+            var message = util.format(
+                'Your report got written to %s',
+                chalk.magenta(options.path)
+            );
+
+            // And output it.
+            gutil.log(message);
+
+            callback();
+        });
     });
 }
 
-gulp.task('showPhpFiles', function() {
+var printCheckstyleReport = function(options) {
+    return through.obj(function(file, enc, callback) {
+        var stream = this;
+
+        fs.readFile(file.path, 'utf8', function(err, data) {
+            if(err) throw err;
+
+            var xmlReport = libxml.parseXmlString(data);
+            
+            var allErrors = 0;
+
+            xmlReport.find('//file').forEach(function(fileNode){
+                allErrors += fileNode.childNodes().length;
+                gutil.log(chalk.cyan(fileNode.attr('name').value().replace('/target/', '')), 'errors', chalk.magenta(fileNode.childNodes().length));
+            });
+
+            gutil.log(chalk.cyan("Summary"), 'errors', chalk.magenta(allErrors));
+            
+            stream.push(file);
+            callback();
+        });
+
+    });
+}
+
+gulp.task('preparePhpReport', function() {
     return gulp
-        .src(targetFiles.php, {cwd: '/target/'})
-        .pipe(debug({ title: 'php' }))
+        .src(targetFiles, {cwd: '/target/'})
         .pipe(phpCsPlugin())
         .pipe(phpMdPlugin())
         .pipe(phpLintPlugin())
@@ -362,10 +396,9 @@ gulp.task('showPhpFiles', function() {
         ;
 });
 
-gulp.task('showJsFiles', function() {
+gulp.task('prepareJsReport', function() {
     return gulp
-        .src(targetFiles.js, {cwd: '/target/'})
-        .pipe(debug({ title: 'js' }))
+        .src(targetFiles, {cwd: '/target/'})
         .pipe(jsHintPlugin())
         .pipe(combineReports({
             path: '/output/report-js.xml',
@@ -373,35 +406,16 @@ gulp.task('showJsFiles', function() {
         ;
 });
 
-gulp.task('showFiles', function(done) {
-    seq(['showPhpFiles', 'showJsFiles'], done);
+gulp.task('prepareReport', function(done) {
+    seq(['preparePhpReport', 'prepareJsReport'], done);
 });
 
 gulp.task('default', function(done) {
-    seq('getFiles', 'showFiles', ['phplint', 'phpcs', 'phpmd', 'jshint'], 'printReport', done);
+    seq('getFiles', 'prepareReport', 'printReport', done);
 });
 
-gulp.task('phplint', function(done) {
-    console.log('stub');
-    done();
-});
-
-gulp.task('phpcs', function(done) {
-    console.log('stub');
-    done();
-});
-
-gulp.task('phpmd', function(done) {
-    console.log('stub');
-    done();
-});
-
-gulp.task('jshint', function(done) {
-    console.log('stub');
-    done();
-});
-
-gulp.task('printReport', function(done) {
-    console.log('stub');
-    done();
+gulp.task('printReport', function() {
+    return gulp
+        .src('/output/**/*.xml')
+        .pipe(printCheckstyleReport());
 });
