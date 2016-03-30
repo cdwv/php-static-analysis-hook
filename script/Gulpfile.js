@@ -2,7 +2,7 @@
 * @Author: Grzegorz Daszuta
 * @Date:   2016-03-18 13:31:54
 * @Last Modified by:   Grzegorz Daszuta
-* @Last Modified time: 2016-03-29 16:18:09
+* @Last Modified time: 2016-03-30 08:45:48
 */
 
 'use strict';
@@ -16,6 +16,9 @@ var exec = require('child_process').exec;
 var through = require('through2');
 var fs = require('fs');
 var libxml = require("libxmljs");
+var util = require("util");
+var gutil = require('gulp-util');
+var chalk = require('chalk');
 
 var targetFiles = {
     php: [],
@@ -97,8 +100,6 @@ var lintPlugin = function(options) {
     return through.obj(function(file, enc, callback) {
         var stream = this;
 
-        // console.log('Reports', file.path, file.reports)
-
         this.push(file);
         callback();
     });
@@ -120,7 +121,7 @@ var phpMdPlugin = function(options) {
  
         exec(args.join(' '), {}, function(error, stdout, stderr) {
             file.reports = file.reports || {};
-            file.reports.phpmd = stdout;
+            file.reports.phpmd = {path: file.path, message: stdout};
 
             stream.push(file);
 
@@ -146,7 +147,7 @@ var phpCsPlugin = function(options) {
  
         exec(args.join(' '), {}, function(error, stdout, stderr) {
             file.reports = file.reports || {};
-            file.reports.phpcs = stdout;
+            file.reports.phpcs = {message: stdout, path: file.path};
 
             stream.push(file);
 
@@ -178,21 +179,44 @@ var phpLintPlugin = function(options) {
     });
 }
 
+var jsHintPlugin = function(options) {
+    return through.obj(function(file, enc, callback) {
+        var stream = this;
+
+        var args = [
+            'jshint',
+            '--reporter=checkstyle',
+        ];
+
+        args.push(file.path);
+ 
+        exec(args.join(' '), {}, function(error, stdout, stderr) {
+            file.reports = file.reports || {};
+            file.reports.jshint = { path: file.path, message: stdout};
+
+            stream.push(file);
+
+            callback();
+        });
+    });
+}
+
 var convertReport = function(engine, report)
 {
     switch(engine)
     {
+        // Checkstyle-complaint reporters
         case 'phpcs':
+        case 'jshint':
             try {
-                var xmlReport = libxml.parseXml(report);
+                xmlReport = libxml.parseXmlString(report.message);
             } catch(e) {
-                return libxml.Document();
+                throw "Error " + e + " in " + JSON.stringify(report.message);
             }
-
             return xmlReport;
             
         case 'phpmd':
-                var pmdXmlReport = libxml.parseXmlString(report);
+                var pmdXmlReport = libxml.parseXmlString(report.message);
                 var xmlReport = libxml.Document();
                 var fileName;
 
@@ -251,7 +275,7 @@ var convertReport = function(engine, report)
             var checkStyle = xmlReport
                 .node('checkstyle');
             
-            if(! /^No syntax errors detected in/.test(report)) {
+            if(! /^No syntax errors detected in/.test(report.message)) {
                 var message = report.message
                     .replace('Errors parsing ' + report.path, '')
                     .trim();
@@ -303,8 +327,25 @@ var combineReports = function(options) {
                 });
             }
         };
+            fs.writeFile(options.path, combinedReport.toString(), function(err) {
+                if (err) {
+                    stream.emit('error', new gutil.PluginError('gulp-phpcs', err));
+                    callback();
 
-        console.log(combinedReport.toString());
+                    return;
+                }
+
+                // Build console info message
+                var message = util.format(
+                    'Your report got written to %s',
+                    chalk.magenta(options.path)
+                );
+
+                // And output it.
+                gutil.log(message);
+
+                callback();
+            });
     });
 }
 
