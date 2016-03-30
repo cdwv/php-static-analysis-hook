@@ -43,4 +43,4 @@ The script in it's current version is only a proof of concept and should be used
 
 ## Docker usage
 
-```docker build -t cdwv/static-anal . && docker run -it --rm -v <source tree base>:/target cdwv/static-anal```
+```docker build -t cdwv/static-anal . && docker run -it --rm -v <source tree base>:/target -v <log output dir>:/output cdwv/static-anal```
