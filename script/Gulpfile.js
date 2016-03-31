@@ -2,7 +2,7 @@
 * @Author: Grzegorz Daszuta
 * @Date:   2016-03-18 13:31:54
 * @Last Modified by:   Grzegorz Daszuta
-* @Last Modified time: 2016-03-31 11:52:18
+* @Last Modified time: 2016-03-31 13:33:12
 */
 
 'use strict';
@@ -64,6 +64,7 @@ gulp.task('getFiles', function(done) {
             }).forEach(function(i) {
                 targetFiles.push(i);
             });
+
 
         done();
     });
@@ -391,7 +392,7 @@ var printCheckstyleReport = function(options) {
                             severityColor = chalk.green;
                     }
                     var formatedError = util.format("%s %s %s %s"
-                        , severityColor(errorNode.attr('engine').value() + severity)
+                        , severityColor(errorNode.attr('engine').value() + ' ' + severity)
                         , errorNode.attr('line') ? "line " + chalk.cyan(errorNode.attr('line').value()) : ""
                         , errorNode.attr('column') ? "column " + chalk.cyan(errorNode.attr('column').value()) : ""
                         , errorNode.attr('message').value()
