@@ -2,7 +2,7 @@
 * @Author: Grzegorz Daszuta
 * @Date:   2016-03-18 13:31:54
 * @Last Modified by:   Grzegorz Daszuta
-* @Last Modified time: 2016-03-30 13:57:22
+* @Last Modified time: 2016-03-31 11:52:18
 */
 
 'use strict';
@@ -246,7 +246,7 @@ var convertReport = function(engine, report)
                     violations.forEach(function(node) {
                         cs.node('error').attr({
                             message: node.text().trim(),
-                            line: node.beginline,
+                            line: node.attr('beginline') ? node.attr('beginline').value() : null,
                             source: node.attr('ruleset').value().replace(/\s/,'') + '.' + node.attr('rule').value(),
                             severity: 'warning',
                             package: node.attr('package') ? node.attr('package').value() : null,
@@ -270,6 +270,7 @@ var convertReport = function(engine, report)
                         line: line,
                         column: col,
                         severity: 'error',
+                        critical: true,
                         source: 'Php.PhpMd',
 
                     });
@@ -297,7 +298,7 @@ var convertReport = function(engine, report)
 
             checkStyle
                 .node('file').attr({ name: report.path })
-                .node('error').attr({ message: message, line: line, source: 'Php.Lint', severity: 'error' });
+                .node('error').attr({ message: message, line: line, source: 'Php.Lint', severity: 'error', critical: true });
             }
 
             return xmlReport;
@@ -360,6 +361,8 @@ var combineReports = function(options) {
 }
 
 var printCheckstyleReport = function(options) {
+    var criticalErrors = [];
+
     return through.obj(function(file, enc, callback) {
         var stream = this;
 
@@ -372,7 +375,35 @@ var printCheckstyleReport = function(options) {
 
             xmlReport.find('//file').forEach(function(fileNode){
                 allErrors += fileNode.childNodes().length;
-                gutil.log(chalk.cyan(fileNode.attr('name').value().replace('/target/', '')), 'errors', chalk.magenta(fileNode.childNodes().length));
+                gutil.log(chalk.cyan(fileNode.attr('name').value().replace('/target/', '')), 'contains', chalk.magenta(fileNode.childNodes().length), 'errors');
+                fileNode.childNodes().forEach(function(errorNode) {
+                    var severity = errorNode.attr('severity').value();
+                    var severityColor;
+
+                    switch(severity) {
+                        case 'warning':
+                            severityColor = chalk.yellow;
+                            break;
+                        case 'error':
+                            severityColor = chalk.red;
+                            break;
+                        default:
+                            severityColor = chalk.green;
+                    }
+                    var formatedError = util.format("%s %s %s %s"
+                        , severityColor(errorNode.attr('engine').value() + severity)
+                        , errorNode.attr('line') ? "line " + chalk.cyan(errorNode.attr('line').value()) : ""
+                        , errorNode.attr('column') ? "column " + chalk.cyan(errorNode.attr('column').value()) : ""
+                        , errorNode.attr('message').value()
+                        // , errorNode.toString()
+                        );
+                    gutil.log(formatedError);
+
+                    if(errorNode.attr('critical') && errorNode.attr('engine').value()) {
+                        gutil.log(severityColor(errorNode.attr('engine').value() + severity, 'is critical'));
+                        criticalErrors.push(formatedError);
+                    }
+                });
             });
 
             gutil.log(chalk.cyan("Summary"), 'errors', chalk.magenta(allErrors));
@@ -381,6 +412,19 @@ var printCheckstyleReport = function(options) {
             callback();
         });
 
+    }, function(callback) {
+        if(criticalErrors.length) {
+            gutil.log(util.format("%s %s %s", 
+                chalk.red("Found"),
+                chalk.magenta(criticalErrors.length),
+                chalk.red("critical errors in repository. Breaking build.")));
+            criticalErrors.forEach(function(error) {
+                gutil.log(error);
+            });
+            process.exit(254);
+        }
+
+        callback();
     });
 }
 
