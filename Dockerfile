@@ -39,4 +39,4 @@ ADD ./script/*.js /app/
 
 ADD phpmd/* /app/phpmd/
 
-# ENTRYPOINT ["gulp"]
+ENTRYPOINT ["gulp"]
