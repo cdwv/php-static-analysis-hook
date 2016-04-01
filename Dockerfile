@@ -25,18 +25,18 @@ RUN locale-gen --lang en
 RUN apt-get install -y php5-cli php7.0-cli python build-essential
 RUN npm install -g gulp-cli jshint
 
-# ADD script/ /app 
-
 WORKDIR /app
-ADD ./script/package.json /app/
-ADD ./script/composer.json /app/
+
+ADD package.json /app/
+ADD composer.json /app/
 
 RUN npm install
 RUN wget -O- https://getcomposer.org/installer | php
 RUN php composer.phar install
 
-ADD ./script/*.js /app/
-
+ADD ./script/ /app/
 ADD phpmd/* /app/phpmd/
+ADD jshintrc /app/jshint/
+RUN mkdir /output
 
 ENTRYPOINT ["gulp"]

@@ -51,6 +51,12 @@ docker run -it --rm -v <source tree base>:/target -v <log output dir>:/output cd
 ### Example pre-commit hook
 
 ```
+docker run --rm -v $(git rev-parse --show-toplevel):/target cdwv/static-anal --all
+```
+
+### (Optional) Save logs
+
+```
 #!/bin/bash
 mkdir -p $(git rev-parse --show-toplevel)/build/logs
 docker run --rm -v $(git rev-parse --show-toplevel):/target -v $(git rev-parse --show-toplevel)/build/logs:/output cdwv/static-anal --all
