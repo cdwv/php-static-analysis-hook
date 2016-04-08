@@ -2,7 +2,7 @@
 * @Author: Grzegorz Daszuta
 * @Date:   2016-03-18 13:31:54
 * @Last Modified by:   Grzegorz Daszuta
-* @Last Modified time: 2016-04-01 13:50:31
+* @Last Modified time: 2016-04-08 09:54:38
 */
 
 // jshint node: true
@@ -22,12 +22,27 @@ var printReports = require('./plugins/printReports.js');
 
 var targetFiles = [];
 
+var mm = require('micromatch');
+
 var fileTypes = [
     'php',
     'js',
     'css',
     'scss',
 ];
+
+var matchFiles = [
+    '**/*'
+];
+
+if(argv['ignore-symfony']) {
+    matchFiles = matchFiles.concat([
+        '!{var,app}/App{Cache,Kernel}.php',
+        '!app/autoload.php',
+        '!var/SymfonyRequirements.php',
+        '!web/{app,app_dev,config}.php'
+    ]);
+}
 
 gulp.task('getFiles', function(done) {
     git.exec({
@@ -74,7 +89,7 @@ gulp.task('getFiles', function(done) {
 
 gulp.task('prepareReport', function() {
     return gulp
-        .src(targetFiles, {cwd: '/target/'})
+        .src(mm(targetFiles, matchFiles), {cwd: '/target/'})
         .pipe(phpLintPlugin({
             path: '/output/report-phplint.checkstyle.xml',
         }))

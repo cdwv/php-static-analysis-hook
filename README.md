@@ -61,3 +61,8 @@ docker run --rm -v $(git rev-parse --show-toplevel):/target cdwv/static-anal --a
 mkdir -p $(git rev-parse --show-toplevel)/build/logs
 docker run --rm -v $(git rev-parse --show-toplevel):/target -v $(git rev-parse --show-toplevel)/build/logs:/output cdwv/static-anal --all
 ```
+
+### Options
+
+    --all - Process all files in repository, regardles of whether they are commited
+    --ignore-symfony - Ignore files coming from symfony (don't use unless you're _NOT_ touching them)
